@@ -122,7 +122,7 @@ class Entity:
     def importFromFile(cls, csvFileName):
         ''' take a CSV file as input, reads it and create main and attribute entities,
         groups and links in between '''
-        fileToRead = open(csvFileName, "r")
+        fileToRead = open(csvFileName, 'r', newline='')
         csvReader = csv.reader(fileToRead, delimiter=',', dialect='excel',
                                quotechar='"')
         # fetch headers
@@ -198,7 +198,7 @@ class Entity:
     def exportToFile(cls, folderPath):
         ''' print main entities, relative attributes and groups they belong in CSV format. '''
         fileName = folderPath + "/entython_export_%s.csv" % datetime.now().strftime("%Y%m%d_%H-%M-%S")
-        csvFileToWrite = open(fileName, 'a')
+        csvFileToWrite = open(fileName, 'a', newline='')
         
         fieldNames = cls.__passportHeaders
         fieldNames.extend(cls.__attributeTypes)
