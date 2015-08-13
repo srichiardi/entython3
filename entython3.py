@@ -14,8 +14,8 @@ class Entity:
     
     
     def __init__(self, entType, entName, attrTypes=[]):
-        self.type = re.sub(r'\s', '', entType.strip().upper()) # clean up the string for consistency
-        self.name = re.sub(r'\s', '', entName.strip().lower()) # clean up the string for consistency
+        self.type = entType
+        self.name = entName
         self.group = None
         self.attributes = {}
         for item in attrTypes:
@@ -127,8 +127,9 @@ class Entity:
         fileToRead = open(csvFileName, 'r', newline='')
         csvReader = csv.reader(fileToRead, delimiter=',', dialect='excel',
                                quotechar='"')
-        # fetch headers
-        headers = next(csvReader)
+        
+        # fetch headers and cleaning them up
+        headers = [ re.sub(r'\s', '', hdr.strip().upper()) for hdr in next(csvReader) ]
         
         # quit the process if file contains less than 2 columns
         if len(headers) < 2:
@@ -164,7 +165,8 @@ class Entity:
             if line[0] == "":
                 continue
             
-            mainEnt = cls.getEntity(met, line[0], aTypes)
+            men = re.sub(r'\s', '', line[0].strip().lower()) # Main Entity Name cleaned from spaces
+            mainEnt = cls.getEntity(met, men, aTypes)
             mec += 1
             # assign new group (or confirm current)
             # only main entities create groups, attributes receive them and transfer them
@@ -172,11 +174,12 @@ class Entity:
             
             for attrType in aTypes:
                 idx = headerDict[attrType]
+                aen = re.sub(r'\s', '', line[idx].strip().lower()) # Attribute Entity Name cleaned
                 # skip if attribute is empty
-                if line[idx] == "":
+                if aen == "":
                     continue
                 
-                attribute = cls.getEntity(attrType, line[idx], [met])
+                attribute = cls.getEntity(attrType, aen, [met])
                 # add attributes to the entity, and join same group
                 mainEnt.linkTo(attribute) 
                     
@@ -184,7 +187,7 @@ class Entity:
         
         gn = len(Group._Group__groupInstances)
         
-        print('Import completed. Imported {} entities type "{}", in {} group(s).'.format(mec, met, gn))
+        print('Import completed. Imported {} new entities type "{}", in {} group(s).'.format(mec, met, gn))
         
         
     @classmethod
@@ -215,6 +218,8 @@ class Entity:
                 csvWriter.writerows(entityRecords)
             
         csvFileToWrite.close()
+        
+        print('Export completed. Data saved in {}.'.format(fileName))
         
 
 
