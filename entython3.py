@@ -2,6 +2,8 @@ from weakref import WeakValueDictionary
 from datetime import datetime
 import csv
 import sys
+import re
+
 
 
 class Entity:
@@ -12,8 +14,8 @@ class Entity:
     
     
     def __init__(self, entType, entName, attrTypes=[]):
-        self.type = entType
-        self.name = entName
+        self.type = re.sub(r'\s', '', entType.strip().upper()) # clean up the string for consistency
+        self.name = re.sub(r'\s', '', entName.strip().lower()) # clean up the string for consistency
         self.group = None
         self.attributes = {}
         for item in attrTypes:
