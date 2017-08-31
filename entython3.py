@@ -18,6 +18,7 @@ class Entity:
         self.name = entName
         self.group = None
         self.attributes = {}
+        self.links_count = 0
         for item in attrTypes:
             self.attributes[item] = []
         # adding entity to the collection
@@ -73,8 +74,13 @@ class Entity:
                     nextAttr = True
                 except IndexError:
                     value = ''
+                    cnt = ''
+                else:
+                    attr_entity = Entity.getEntity(key, value, [self.type])
+                    cnt = attr_entity.links_count
                 finally:
                     tempDict[key] = value
+                    tempDict[key + "_CNT"] = cnt
                     
             if nextAttr:
                 dictList.append(tempDict)
@@ -88,6 +94,8 @@ class Entity:
             self.attributes[attribute.type].append(attribute.name)
             # and adding self entity to attribute entity
             attribute.attributes[self.type].append(self.name)
+            attribute.links_count += 1
+            self.links_count += 1
             
             # negotiate group with attribute
             attribute.joinGroup(self)
@@ -202,6 +210,16 @@ class Entity:
     
     
     @classmethod
+    def headers_with_count(cls):
+        hdr_list = []
+        for hdr in cls.__attributeTypes:
+            hdr_list.append(hdr)
+            hdr_list.append(hdr + "_CNT")
+        
+        return hdr_list
+    
+    
+    @classmethod
     def exportToFile(cls, folderPath):
         ''' print main entities, relative attributes and groups they belong in CSV format. '''
         folderPath = folderPath.replace("\\","/")
@@ -209,7 +227,7 @@ class Entity:
         csvFileToWrite = open(fileName, 'a', newline='')
         
         fieldNames = cls.__passportHeaders
-        fieldNames.extend(cls.__attributeTypes)
+        fieldNames.extend(cls.headers_with_count())
         
         csvWriter = csv.DictWriter(csvFileToWrite, fieldNames, restval='', delimiter=',',
                                    extrasaction='ignore', dialect='excel', quotechar='"')
